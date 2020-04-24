@@ -42,7 +42,7 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
-        this.dragData = {lx:0,ly:0,mx:0,my:0,isMove:false};
+        this.initDragDate()
         console.log("onload")
     },
 
@@ -54,6 +54,9 @@ cc.Class({
         });
         console.log("start")
     },
+    initDragDate(){
+        this.dragData = {lx:0,ly:0,mx:0,my:0,isMove:false,ox:0,oy:0};
+    },
 
     selectFace(id) {
         this.box1.active = false
@@ -64,21 +67,31 @@ cc.Class({
         if(face){
             for (let i = 0; i < face.children.length; i++) {
                 face.children[i].on(cc.Node.EventType.TOUCH_START, event=> {
+                    this.dragData.ox = face.children[i].x
+                    this.dragData.oy = face.children[i].y
                     this.dragData.lx = event.getLocationX()
                     this.dragData.ly = event.getLocationY()
                     console.log("clickStart:",this.dragData)
                 });
                 face.children[i].on(cc.Node.EventType.TOUCH_MOVE, event=> {
-                    this.dragData.lx = event.getLocationX()
-                    this.dragData.ly = event.getLocationY()
-                    console.log("clickMove:",this.dragData)
+                    this.dragData.mx = event.getLocationX()
+                    this.dragData.my = event.getLocationY()
+                    let delta = event.getDelta()
+                    face.children[i].x += delta.x
+                    face.children[i].y += delta.y
                 });
                 face.children[i].on(cc.Node.EventType.TOUCH_END, event=> {
-                    this.dragData.lx = event.getLocationX()
-                    this.dragData.ly = event.getLocationY()
+                    face.children[i].x = this.dragData.ox;
+                    face.children[i].y = this.dragData.oy;
                     console.log("clickEnd:",this.dragData)
+                    this.initDragDate()
                 });
-            
+                face.children[i].on(cc.Node.EventType.TOUCH_CANCEL, event=> {
+                    face.children[i].x = this.dragData.ox;
+                    face.children[i].y = this.dragData.oy;
+                    console.log("clickCancel:",this.dragData)
+                    this.initDragDate()
+                });
             }
         }
     },
